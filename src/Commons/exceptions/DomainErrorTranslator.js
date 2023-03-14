@@ -19,6 +19,8 @@ DomainErrorTranslator._directories = {
   'DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('refresh token harus string'),
   'ADD_THREAD.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('Failed to add thread. The required properties are missing.'),
   'ADD_THREAD.NOT_MEET_DATA_TYPE_SPESIFICATION': new InvariantError('Failed to add thread. The type data of the property does not match.'),
+  'ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('Failed to add comment. The required properties are missing.'),
+  'ADD_COMMENT.NOT_MEET_DATA_TYPE_SPESIFICATION': new InvariantError('Failed to add comment. The type data of the property does not match.'),
 };
 
 module.exports = DomainErrorTranslator;
