@@ -167,4 +167,24 @@ describe('CommentRepositoryPostgres', () => {
       expect(deletedComment[0].is_delete).toBeTruthy();
     });
   });
+
+  describe('getCommentsByThreadId function', () => {
+    it('should return a comments correctly', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'user' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
+      await CommentsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123', owner: 'user-123' });
+
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool);
+
+      // Action
+      const comment = await commentRepositoryPostgres.getCommentsByThreadId(
+        'thread-123',
+      );
+
+      // Assert
+      expect(comment[0].id).toEqual('comment-123');
+      expect(comment[0].username).toEqual('user');
+    });
+  });
 });

@@ -88,8 +88,9 @@ describe('ThreadRepositoryPostgres', () => {
       // Arrange
       const fakeIdGenerator = () => '123'; // stub!
       const credentialId = 'user-123';
+      const username = 'user';
 
-      await UsersTableTestHelper.addUser({ id: credentialId });
+      await UsersTableTestHelper.addUser({ id: credentialId, username });
 
       const addThread = new AddThread({
         title: 'Title',
@@ -107,6 +108,7 @@ describe('ThreadRepositoryPostgres', () => {
 
       // Assert
       expect(threadResponse.id).toEqual('thread-123');
+      expect(threadResponse.username).toEqual(username);
     });
   });
 });

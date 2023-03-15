@@ -5,7 +5,7 @@ const CommentRepository = require('../../../Domains/comments/CommentRepository')
 const GetDetailThreadUseCase = require('../GetDetailThreadUseCase');
 
 describe('GetDetailThreadUseCase', () => {
-  it('should orchestrating the get detail comment action correctly', async () => {
+  it('should orchestrating the get detail thread action correctly', async () => {
     // Arrange
     const threadId = 'thread-123';
     const commentId = 'comment-123';
@@ -39,7 +39,7 @@ describe('GetDetailThreadUseCase', () => {
 
     const expectedResult = {
       ...mockThread,
-      comments: expectedComment,
+      ...expectedComment,
     };
 
     /* creating dependency of use case */
@@ -69,7 +69,7 @@ describe('GetDetailThreadUseCase', () => {
     expect(getThread).toStrictEqual(expectedResult);
   });
 
-  it('should orchestrating the get detail comment action correctly', async () => {
+  it('should orchestrating the get detail thread with deleted comment action correctly', async () => {
     // Arrange
     const threadId = 'thread-123';
 
@@ -115,7 +115,7 @@ describe('GetDetailThreadUseCase', () => {
 
     const expectedResult = {
       ...mockThread,
-      comments: expectedComment,
+      ...expectedComment,
     };
 
     /* creating dependency of use case */

@@ -20,7 +20,7 @@ class GetDetailThreadUseCase {
 
     const thread = new DetailThread(threadFromDb);
     const comments = new DetailComments(changeDeletedCommentsContent);
-    return { ...thread, comments };
+    return { ...thread, ...comments };
   }
 }
 

@@ -1,9 +1,10 @@
 const pool = require('../../database/postgres/pool');
-const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const container = require('../../container');
 const createServer = require('../createServer');
 const AccessTestHelper = require('../../../../tests/AccessTestHelper');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
+const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
+const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
 
 describe('/threads endpoint', () => {
   afterAll(async () => {
@@ -134,6 +135,78 @@ describe('/threads endpoint', () => {
       expect(response.statusCode).toEqual(400);
       expect(responseJson.status).toEqual('fail');
       expect(responseJson.message).toEqual('Failed to add thread. The type data of the property does not match.');
+    });
+  });
+
+  describe('when GET /threads/{threadId}', () => {
+    it('should response 200 and detail thread', async () => {
+      // Arrange
+      const threadId = 'thread-123';
+      const server = await createServer(container);
+
+      await UsersTableTestHelper.addUser({ id: 'user-1', username: 'user1' });
+      await UsersTableTestHelper.addUser({ id: 'user-2', username: 'user2' });
+
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: 'user-1' });
+      await CommentsTableTestHelper.addComment({ id: 'comment-1', owner: 'user-1', threadId });
+      await CommentsTableTestHelper.addComment({ id: 'comment-2', owner: 'user-2', threadId });
+
+      // Action
+      const response = await server.inject({
+        method: 'GET',
+        url: `/threads/${threadId}`,
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+      expect(responseJson.data.thread).toBeDefined();
+    });
+
+    it('should response 200 and detail thread with deleted comments', async () => {
+      // Arrange
+      const threadId = 'thread-123';
+      const server = await createServer(container);
+
+      await UsersTableTestHelper.addUser({ id: 'user-1', username: 'user1' });
+      await UsersTableTestHelper.addUser({ id: 'user-2', username: 'user2' });
+
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: 'user-1' });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-1', owner: 'user-1', threadId, isDelete: true,
+      });
+      await CommentsTableTestHelper.addComment({ id: 'comment-2', owner: 'user-2', threadId });
+
+      // Action
+      const response = await server.inject({
+        method: 'GET',
+        url: `/threads/${threadId}`,
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+      expect(responseJson.data.thread).toBeDefined();
+      expect(responseJson.data.thread.comments[0].content).toEqual('**komentar telah dihapus**');
+    });
+
+    it('should response 404 when thread does not exist', async () => {
+      // Arrange
+      const server = await createServer(container);
+
+      // Action
+      const response = await server.inject({
+        method: 'GET',
+        url: '/threads/thread-123',
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual('fail');
+      expect(responseJson.message).toEqual('Thread not found.');
     });
   });
 });
