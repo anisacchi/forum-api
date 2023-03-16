@@ -2,7 +2,7 @@
 const pool = require('../src/Infrastructures/database/postgres/pool');
 
 const RepliesTableTestHelper = {
-  async addReplies({
+  async addReply({
     id = 'reply-123',
     content = 'This is a reply',
     date = '1600-01-01T00:00:00.000Z',
