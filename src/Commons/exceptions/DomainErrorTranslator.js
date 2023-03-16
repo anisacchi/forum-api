@@ -21,6 +21,8 @@ DomainErrorTranslator._directories = {
   'ADD_THREAD.NOT_MEET_DATA_TYPE_SPESIFICATION': new InvariantError('Failed to add thread. The type data of the property does not match.'),
   'ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('Failed to add comment. The required properties are missing.'),
   'ADD_COMMENT.NOT_MEET_DATA_TYPE_SPESIFICATION': new InvariantError('Failed to add comment. The type data of the property does not match.'),
+  'ADD_REPLY.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('Failed to add reply. The required properties are missing.'),
+  'ADD_REPLY.NOT_MEET_TYPE_DATA_SPESIFICATION': new InvariantError('Failed to add reply. The type data of the property does not match.'),
 };
 
 module.exports = DomainErrorTranslator;
