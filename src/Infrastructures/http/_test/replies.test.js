@@ -231,4 +231,42 @@ describe('replies endpoint', () => {
       expect(responseJson.message).toEqual('Failed to add reply. The type data of the property does not match.');
     });
   });
+
+  describe('when DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}', () => {
+    it('should response 200 and is_delete has value true', async () => {
+      // Arrange
+      const threadId = 'thread-123';
+      const commentId = 'comment-123';
+      const replyId = 'reply-123';
+
+      const server = await createServer(container);
+      const { userId, accessToken } = await AccessTestHelper.getUserIdAndAccessToken(
+        server,
+        {
+          username: 'user',
+          password: 'secret',
+        },
+      );
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
+      await CommentsTableTestHelper.addComment({ id: commentId, threadId, owner: userId });
+      await RepliesTableTestHelper.addReply({ id: replyId, owner: userId, commentId });
+
+      // Action
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/threads/${threadId}/comments/${commentId}/replies/${replyId}`,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const deletedReply = await RepliesTableTestHelper.findReplyById(replyId);
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+      expect(deletedReply[0].is_delete).toBeTruthy();
+    });
+  });
 });
