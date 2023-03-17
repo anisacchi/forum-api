@@ -131,7 +131,7 @@ describe('CommentRepositoryPostgres', () => {
         .rejects.toThrowError('Failed to delete comment. Only the comment owner can delete it.');
     });
 
-    it('should return a comment correctly when comment and owner match', async () => {
+    it('should not throw error when comment and owner match', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({ id: 'user-123' });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
