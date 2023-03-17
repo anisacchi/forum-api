@@ -1,4 +1,4 @@
-class DetailComments {
+class GetComments {
   constructor(payload) {
     this._verifyPayload(payload);
 
@@ -11,7 +11,7 @@ class DetailComments {
         id, username, date, content,
       }) => {
         if (!id || !username || !date || !content) {
-          throw new Error('DETAIL_COMMENTS.NOT_CONTAIN_NEEDED_PROPERTY');
+          throw new Error('GET_COMMENTS.NOT_CONTAIN_NEEDED_PROPERTY');
         }
 
         if (
@@ -20,11 +20,11 @@ class DetailComments {
           || typeof date !== 'string'
           || typeof content !== 'string'
         ) {
-          throw new Error('DETAIL_COMMENTS.NOT_MEET_DATA_TYPE_SPESIFICATION');
+          throw new Error('GET_COMMENTS.NOT_MEET_DATA_TYPE_SPESIFICATION');
         }
       });
     }
   }
 }
 
-module.exports = DetailComments;
+module.exports = GetComments;

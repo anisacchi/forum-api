@@ -1,6 +1,6 @@
-const DetailComments = require('../DetailComments');
+const GetComments = require('../GetComments');
 
-describe('a DetailComments entities', () => {
+describe('a GetComments entities', () => {
   it('should throw error when payload did not contain needed properties', () => {
     // Arrange
     const payload = [
@@ -17,7 +17,7 @@ describe('a DetailComments entities', () => {
     ];
 
     // Action and Assert
-    expect(() => new DetailComments(payload)).toThrowError('DETAIL_COMMENTS.NOT_CONTAIN_NEEDED_PROPERTY');
+    expect(() => new GetComments(payload)).toThrowError('GET_COMMENTS.NOT_CONTAIN_NEEDED_PROPERTY');
   });
 
   it('should throw error when payload did not meet data type spesification', () => {
@@ -38,10 +38,10 @@ describe('a DetailComments entities', () => {
     ];
 
     // Action and Assert
-    expect(() => new DetailComments(payload)).toThrowError('DETAIL_COMMENTS.NOT_MEET_DATA_TYPE_SPESIFICATION');
+    expect(() => new GetComments(payload)).toThrowError('GET_COMMENTS.NOT_MEET_DATA_TYPE_SPESIFICATION');
   });
 
-  it('should create detailThread object correctly', () => {
+  it('should create getComments object correctly', () => {
     // Arrange
     const payload = [
       {
@@ -59,7 +59,7 @@ describe('a DetailComments entities', () => {
     ];
 
     // Action
-    const result = new DetailComments(payload);
+    const result = new GetComments(payload);
 
     // Assert
     expect(result.comments).toEqual(payload);

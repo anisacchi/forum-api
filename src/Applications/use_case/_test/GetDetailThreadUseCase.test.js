@@ -1,5 +1,5 @@
 const DetailThread = require('../../../Domains/threads/entities/DetailThread');
-const DetailComments = require('../../../Domains/comments/entities/DetailComments');
+const GetComments = require('../../../Domains/comments/entities/GetComments');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const GetDetailThreadUseCase = require('../GetDetailThreadUseCase');
@@ -28,7 +28,7 @@ describe('GetDetailThreadUseCase', () => {
       },
     ];
 
-    const expectedComment = new DetailComments([
+    const expectedComment = new GetComments([
       {
         id: commentId,
         username: 'user',
@@ -98,7 +98,7 @@ describe('GetDetailThreadUseCase', () => {
       },
     ];
 
-    const expectedComment = new DetailComments([
+    const expectedComment = new GetComments([
       {
         id: 'comment-123',
         username: 'user',

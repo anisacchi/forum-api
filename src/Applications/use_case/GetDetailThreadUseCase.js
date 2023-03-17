@@ -1,4 +1,4 @@
-const DetailComments = require('../../Domains/comments/entities/DetailComments');
+const GetComments = require('../../Domains/comments/entities/GetComments');
 const DetailThread = require('../../Domains/threads/entities/DetailThread');
 
 class GetDetailThreadUseCase {
@@ -19,7 +19,7 @@ class GetDetailThreadUseCase {
     }));
 
     const thread = new DetailThread(threadFromDb);
-    const comments = new DetailComments(changeDeletedCommentsContent);
+    const comments = new GetComments(changeDeletedCommentsContent);
     return { ...thread, ...comments };
   }
 }
