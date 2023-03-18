@@ -89,6 +89,7 @@ describe('GetDetailThreadUseCase', () => {
     // Assert
     expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
     expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(threadId);
+    expect(mockReplyRepository.getRepliesByThreadId).toBeCalledWith(threadId);
     expect(getThread).toStrictEqual(expectedResult);
   });
 
@@ -140,28 +141,6 @@ describe('GetDetailThreadUseCase', () => {
       },
     ];
 
-    const expectedResult = {
-      ...mockThread,
-      comments: mockComment.map(
-        (comment) => ({
-          id: comment.id,
-          content: comment.is_delete ? '**komentar telah dihapus**' : comment.content,
-          date: comment.date,
-          username: comment.username,
-          replies: mockReply
-            .filter((reply) => reply.comment_id === comment.id)
-            .map(
-              (reply) => ({
-                id: reply.id,
-                content: reply.is_delete ? '**balasan telah dihapus**' : reply.content,
-                date: reply.date,
-                username: reply.username,
-              }),
-            ),
-        }),
-      ),
-    };
-
     /* creating dependency of use case */
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
@@ -190,8 +169,13 @@ describe('GetDetailThreadUseCase', () => {
     const getThread = await getDetailThreadUseCase.execute(threadId);
 
     // Assert
-    expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
-    expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(threadId);
-    expect(getThread).toStrictEqual(expectedResult);
+    expect(
+      getThread.comments
+        .filter((comment) => comment.id === 'comment-456')[0].content,
+    ).toEqual('**komentar telah dihapus**');
+    expect(
+      getThread.comments
+        .filter((comment) => comment.id === 'comment-123')[0].replies[0].content,
+    ).toEqual('**balasan telah dihapus**');
   });
 });
