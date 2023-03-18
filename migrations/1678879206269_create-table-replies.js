@@ -19,6 +19,12 @@ exports.up = (pgm) => {
       references: 'users',
       onDelete: 'CASCADE',
     },
+    thread_id: {
+      type: 'VARCHAR(50)',
+      notNull: true,
+      references: 'threads',
+      onDelete: 'CASCADE',
+    },
     comment_id: {
       type: 'VARCHAR(50)',
       notNull: true,

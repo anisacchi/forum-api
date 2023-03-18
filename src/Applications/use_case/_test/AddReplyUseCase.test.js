@@ -56,6 +56,7 @@ describe('AddReplyUseCase', () => {
     expect(addedReply).toStrictEqual(mockReply);
     expect(mockReplyRepository.addReply).toBeCalledWith(
       credentialId,
+      threadId,
       commentId,
       new AddReply({ content: payload.content }),
     );

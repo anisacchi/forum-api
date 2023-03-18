@@ -1,7 +1,7 @@
 const DetailThread = require('../../../Domains/threads/entities/DetailThread');
-const GetComments = require('../../../Domains/comments/entities/GetComments');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
+const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
 const GetDetailThreadUseCase = require('../GetDetailThreadUseCase');
 
 describe('GetDetailThreadUseCase', () => {
@@ -9,6 +9,7 @@ describe('GetDetailThreadUseCase', () => {
     // Arrange
     const threadId = 'thread-123';
     const commentId = 'comment-123';
+    const replyId = 'reply-123';
 
     const mockThread = new DetailThread({
       id: threadId,
@@ -17,6 +18,17 @@ describe('GetDetailThreadUseCase', () => {
       date: '2023',
       username: 'user',
     });
+
+    const mockReply = [
+      {
+        id: replyId,
+        username: 'user',
+        date: '2023',
+        content: 'This is a reply',
+        comment_id: commentId,
+        is_delete: false,
+      },
+    ];
 
     const mockComment = [
       {
@@ -28,23 +40,30 @@ describe('GetDetailThreadUseCase', () => {
       },
     ];
 
-    const expectedComment = new GetComments([
-      {
-        id: commentId,
-        username: 'user',
-        date: '2023',
-        content: 'This is a comment',
-      },
-    ]);
-
     const expectedResult = {
       ...mockThread,
-      ...expectedComment,
+      comments: mockComment.map(
+        (comment) => ({
+          id: comment.id,
+          content: comment.is_delete ? '**komentar telah dihapus**' : comment.content,
+          date: comment.date,
+          username: comment.username,
+          replies: mockReply.map(
+            (reply) => ({
+              id: reply.id,
+              content: reply.is_delete ? '**balasan telah dihapus**' : reply.content,
+              date: reply.date,
+              username: reply.username,
+            }),
+          ),
+        }),
+      ),
     };
 
     /* creating dependency of use case */
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
+    const mockReplyRepository = new ReplyRepository();
 
     /* mocking needed function */
     mockThreadRepository.getThreadById = jest
@@ -53,11 +72,15 @@ describe('GetDetailThreadUseCase', () => {
     mockCommentRepository.getCommentsByThreadId = jest
       .fn()
       .mockImplementation(() => Promise.resolve(mockComment));
+    mockReplyRepository.getRepliesByThreadId = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(mockReply));
 
     /* creating use case instance */
     const getDetailThreadUseCase = new GetDetailThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
+      replyRepository: mockReplyRepository,
     });
 
     // Action
@@ -69,7 +92,7 @@ describe('GetDetailThreadUseCase', () => {
     expect(getThread).toStrictEqual(expectedResult);
   });
 
-  it('should orchestrating the get detail thread with deleted comment action correctly', async () => {
+  it('should orchestrating the get detail thread with deleted comment and reply action correctly', async () => {
     // Arrange
     const threadId = 'thread-123';
 
@@ -98,29 +121,51 @@ describe('GetDetailThreadUseCase', () => {
       },
     ];
 
-    const expectedComment = new GetComments([
+    const mockReply = [
       {
-        id: 'comment-123',
+        id: 'reply-123',
         username: 'user',
         date: '2023',
-        content: 'This is a comment',
+        content: 'This is a reply',
+        comment_id: 'comment-123',
+        is_delete: true,
       },
       {
-        id: 'comment-456',
+        id: 'reply-456',
         username: 'user',
         date: '2023',
-        content: '**komentar telah dihapus**',
+        content: 'This is a reply',
+        comment_id: 'comment-456',
+        is_delete: false,
       },
-    ]);
+    ];
 
     const expectedResult = {
       ...mockThread,
-      ...expectedComment,
+      comments: mockComment.map(
+        (comment) => ({
+          id: comment.id,
+          content: comment.is_delete ? '**komentar telah dihapus**' : comment.content,
+          date: comment.date,
+          username: comment.username,
+          replies: mockReply
+            .filter((reply) => reply.comment_id === comment.id)
+            .map(
+              (reply) => ({
+                id: reply.id,
+                content: reply.is_delete ? '**balasan telah dihapus**' : reply.content,
+                date: reply.date,
+                username: reply.username,
+              }),
+            ),
+        }),
+      ),
     };
 
     /* creating dependency of use case */
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
+    const mockReplyRepository = new ReplyRepository();
 
     /* creating dependency of use case */
     mockThreadRepository.getThreadById = jest
@@ -130,10 +175,15 @@ describe('GetDetailThreadUseCase', () => {
       .fn()
       .mockImplementation(() => Promise.resolve(mockComment));
 
+    mockReplyRepository.getRepliesByThreadId = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(mockReply));
+
     /* creating use case instance */
     const getDetailThreadUseCase = new GetDetailThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
+      replyRepository: mockReplyRepository,
     });
 
     // Action

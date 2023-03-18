@@ -28,12 +28,14 @@ describe('a GetComments entities', () => {
         username: ['user'],
         date: true,
         content: 2023,
+        replies: [''],
       },
       {
         id: true,
         username: 1,
         date: 'date',
         content: [],
+        replies: 'This is a reply',
       },
     ];
 
@@ -49,12 +51,14 @@ describe('a GetComments entities', () => {
         username: 'user1',
         date: '1600-01-01T00:00:00.000Z',
         content: 'This is a comment.',
+        replies: [],
       },
       {
         id: 'comment-456',
         username: 'user2',
         date: '1600-01-01T00:00:00.000Z',
         content: 'This is a comment.',
+        replies: [],
       },
     ];
 

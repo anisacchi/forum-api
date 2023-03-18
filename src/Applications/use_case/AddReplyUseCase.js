@@ -11,7 +11,7 @@ class AddReplyUseCase {
     const addReply = new AddReply(payload);
     await this._threadRepository.getThreadById(threadId);
     await this._commentRepository.getCommentById(commentId);
-    return this._replyRepository.addReply(credentialId, commentId, addReply);
+    return this._replyRepository.addReply(credentialId, threadId, commentId, addReply);
   }
 }
 

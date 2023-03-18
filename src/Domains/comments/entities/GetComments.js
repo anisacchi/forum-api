@@ -8,9 +8,9 @@ class GetComments {
   _verifyPayload(payload) {
     if (payload !== []) {
       payload.forEach(({
-        id, username, date, content,
+        id, username, date, content, replies,
       }) => {
-        if (!id || !username || !date || !content) {
+        if (!id || !username || !date || !content || !replies) {
           throw new Error('GET_COMMENTS.NOT_CONTAIN_NEEDED_PROPERTY');
         }
 
@@ -18,7 +18,7 @@ class GetComments {
           typeof id !== 'string'
           || typeof username !== 'string'
           || typeof date !== 'string'
-          || typeof content !== 'string'
+          || typeof content !== 'string' || !Array.isArray(replies)
         ) {
           throw new Error('GET_COMMENTS.NOT_MEET_DATA_TYPE_SPESIFICATION');
         }

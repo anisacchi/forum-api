@@ -33,7 +33,7 @@ describe('ReplyRepositoryPostgres', () => {
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
-      await replyRepositoryPostgres.addReply('user-123', 'comment-123', addReply);
+      await replyRepositoryPostgres.addReply('user-123', 'thread-123', 'comment-123', addReply);
 
       // Assert
       const reply = await RepliesTableTestHelper.findReplyById('reply-123');
@@ -53,7 +53,7 @@ describe('ReplyRepositoryPostgres', () => {
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
-      const addedReply = await replyRepositoryPostgres.addReply('user-123', 'comment-123', addReply);
+      const addedReply = await replyRepositoryPostgres.addReply('user-123', 'thread-123', 'comment-123', addReply);
 
       // Assert
       expect(addedReply).toStrictEqual(
@@ -79,8 +79,8 @@ describe('ReplyRepositoryPostgres', () => {
       // Arrange
       await UsersTableTestHelper.addUser({ id: 'user-123' });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      await CommentsTableTestHelper.addComment({ id: 'comment-123' });
-      await RepliesTableTestHelper.addReply({ id: 'reply-123' });
+      await CommentsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123' });
+      await RepliesTableTestHelper.addReply({ id: 'reply-123', threadId: 'thread-123', commentId: 'comment-123' });
 
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool);
 
@@ -138,6 +138,26 @@ describe('ReplyRepositoryPostgres', () => {
       // Assert
       const deletedReply = await RepliesTableTestHelper.findReplyById('reply-123');
       expect(deletedReply[0].is_delete).toBeTruthy();
+    });
+  });
+
+  describe('getRepliesByThreadId function', () => {
+    it('should return replies correctly', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
+      await CommentsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123' });
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-123', threadId: 'thread-123', commentId: 'comment-123', owner: 'user-123',
+      });
+
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool);
+
+      // Action
+      const reply = await replyRepositoryPostgres.getRepliesByThreadId('thread-123');
+
+      // Assert
+      expect(reply[0].id).toEqual('reply-123');
     });
   });
 });
