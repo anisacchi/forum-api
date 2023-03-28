@@ -1,4 +1,5 @@
 const AddedThread = require('../../Domains/threads/entities/AddedThread');
+const DetailThread = require('../../Domains/threads/entities/DetailThread');
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 
@@ -23,9 +24,24 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     return new AddedThread({ ...result.rows[0] });
   }
 
-  async getThreadById(id) {
+  async verifyThreadAvailability(id) {
     const query = {
-      text: 'SELECT t.id, t.title, t.body, t.date, u.username FROM threads t LEFT JOIN users u ON t.owner = u.id WHERE t.id = $1',
+      text: 'SELECT * FROM threads WHERE id = $1',
+      values: [id],
+    };
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Thread not found.');
+    }
+  }
+
+  async getDetailThreadById(id) {
+    const query = {
+      text: `SELECT t.id, t.title, t.body, t.date, u.username 
+        FROM threads t LEFT JOIN users u 
+        ON t.owner = u.id 
+        WHERE t.id = $1`,
       values: [id],
     };
     const result = await this._pool.query(query);
@@ -34,7 +50,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       throw new NotFoundError('Thread not found.');
     }
 
-    return result.rows[0];
+    return new DetailThread({ ...result.rows[0] });
   }
 }
 

@@ -5,6 +5,7 @@ const AddComment = require('../../../Domains/comments/entities/AddComment');
 const pool = require('../../database/postgres/pool');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const AddedComment = require('../../../Domains/comments/entities/AddedComment');
+const GetComments = require('../../../Domains/comments/entities/GetComments');
 
 describe('CommentRepositoryPostgres', () => {
   afterEach(async () => {
@@ -25,9 +26,7 @@ describe('CommentRepositoryPostgres', () => {
       await UsersTableTestHelper.addUser({ id: 'user-123' });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
 
-      const addComment = new AddComment({
-        content: 'This is a comment.',
-      });
+      const addComment = new AddComment('user-123', 'thread-123', 'This is a comment.');
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(
         pool,
@@ -35,11 +34,7 @@ describe('CommentRepositoryPostgres', () => {
       );
 
       // Action
-      await commentRepositoryPostgres.addComment(
-        'user-123',
-        'thread-123',
-        addComment,
-      );
+      await commentRepositoryPostgres.addComment(addComment);
 
       // Assert
       const comment = await CommentsTableTestHelper.findCommentById(
@@ -55,9 +50,7 @@ describe('CommentRepositoryPostgres', () => {
       await UsersTableTestHelper.addUser({ id: 'user-123' });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
 
-      const addComment = new AddComment({
-        content: 'This is a comment.',
-      });
+      const addComment = new AddComment('user-123', 'thread-123', 'This is a comment.');
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(
         pool,
@@ -65,11 +58,7 @@ describe('CommentRepositoryPostgres', () => {
       );
 
       // Action
-      const addedComment = await commentRepositoryPostgres.addComment(
-        'user-123',
-        'thread-123',
-        addComment,
-      );
+      const addedComment = await commentRepositoryPostgres.addComment(addComment);
 
       // Assert
       expect(addedComment).toStrictEqual(
@@ -82,39 +71,36 @@ describe('CommentRepositoryPostgres', () => {
     });
   });
 
-  describe('getCommentById function', () => {
+  describe('verifyCommentAvailability function', () => {
     it('should throw error when comment does not exist', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({ id: 'user-123' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool);
 
       // Action and Assert
       await expect(
-        commentRepositoryPostgres.getCommentById('comment-123'),
+        commentRepositoryPostgres.verifyCommentAvailability('comment-123'),
       ).rejects.toThrowError('Comment not found.');
     });
 
-    it('should return a comment correctly', async () => {
+    it('should not throw error when comment is exist', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({ id: 'user-123' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      await CommentsTableTestHelper.addComment({ id: 'comment-123' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123', owner: 'user-123' });
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool);
 
-      // Action
-      const comment = await commentRepositoryPostgres.getCommentById(
-        'comment-123',
-      );
-
-      // Assert
-      expect(comment.id).toEqual('comment-123');
+      // Action and Assert
+      await expect(
+        commentRepositoryPostgres.verifyCommentAvailability('comment-123'),
+      ).resolves.not.toThrowError('Comment not found');
     });
   });
 
-  describe('verifyOwner function', () => {
+  describe('verifyCommentOwner function', () => {
     it('should throw error when comment and owner do not match', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({ id: 'user-123' });
@@ -127,7 +113,7 @@ describe('CommentRepositoryPostgres', () => {
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool);
 
       // Action and Assert
-      await expect(commentRepositoryPostgres.verifyOwner('user-1', 'comment-123'))
+      await expect(commentRepositoryPostgres.verifyCommentOwner('user-1', 'comment-123'))
         .rejects.toThrowError('Failed to delete comment. Only the comment owner can delete it.');
     });
 
@@ -143,7 +129,7 @@ describe('CommentRepositoryPostgres', () => {
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool);
 
       // Action and Assert
-      expect(commentRepositoryPostgres.verifyOwner('user-123', 'comment-123'))
+      expect(commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-123'))
         .resolves.not.toThrowError('Failed to delete comment. Only the comment owner can delete it.');
     });
   });
@@ -173,7 +159,13 @@ describe('CommentRepositoryPostgres', () => {
       // Arrange
       await UsersTableTestHelper.addUser({ id: 'user-123', username: 'user' });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      await CommentsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123', owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        content: 'This is a comment',
+        threadId: 'thread-123',
+        owner: 'user-123',
+        date: '2023',
+      });
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool);
 
@@ -183,8 +175,13 @@ describe('CommentRepositoryPostgres', () => {
       );
 
       // Assert
-      expect(comment[0].id).toEqual('comment-123');
-      expect(comment[0].username).toEqual('user');
+      expect(comment).toStrictEqual(new GetComments([{
+        id: 'comment-123',
+        date: '2023',
+        content: 'This is a comment',
+        is_delete: false,
+        username: 'user',
+      }]));
     });
   });
 });

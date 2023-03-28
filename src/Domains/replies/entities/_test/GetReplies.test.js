@@ -28,17 +28,30 @@ describe('ad GetReplies entities', () => {
         content: ['This is a reply'],
         date: 2023,
         username: true,
+        is_delete: [false],
       },
       {
         id: 456,
         content: ['This is a reply'],
         date: 2023,
         username: false,
+        is_delete: 'True',
       },
     ];
 
     // Action and Assert
     expect(() => new GetReplies(payload)).toThrowError('GET_REPLIES.NOT_MEET_DATA_TYPE_SPESIFICATION');
+  });
+
+  it('should create getReplies object with empty array value when there are no replies', () => {
+    // Arrange
+    const payload = [];
+
+    // Action
+    const result = new GetReplies(payload);
+
+    // Assert
+    expect(result.replies).toEqual(payload);
   });
 
   it('should create getReplies object correctly', () => {
@@ -49,12 +62,14 @@ describe('ad GetReplies entities', () => {
         content: 'This is a reply',
         username: 'user1',
         date: '1600-01-01T00:00:00.000Z',
+        is_delete: false,
       },
       {
         id: 'reply-456',
         content: 'This is a reply',
         username: 'user2',
         date: '1600-01-01T00:00:00.000Z',
+        is_delete: true,
       },
     ];
 

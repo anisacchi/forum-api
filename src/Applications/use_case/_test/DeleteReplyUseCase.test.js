@@ -17,21 +17,11 @@ describe('DeleteReplyUseCase', () => {
     const mockReplyRepository = new ReplyRepository();
 
     /* mocking needed function */
-    mockThreadRepository.getThreadById = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(threadId));
-    mockCommentRepository.getCommentById = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(commentId));
-    mockReplyRepository.getReplyById = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(replyId));
-    mockReplyRepository.verifyOwner = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(credentialId, replyId));
-    mockReplyRepository.deleteReply = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(replyId));
+    mockThreadRepository.verifyThreadAvailability = jest.fn(() => Promise.resolve());
+    mockCommentRepository.verifyCommentAvailability = jest.fn(() => Promise.resolve());
+    mockReplyRepository.verifyReplyAvailability = jest.fn(() => Promise.resolve());
+    mockReplyRepository.verifyReplyOwner = jest.fn(() => Promise.resolve());
+    mockReplyRepository.deleteReply = jest.fn(() => Promise.resolve());
 
     /* creating use case instance */
     const deleteReplyUseCase = new DeleteReplyUseCase({
@@ -44,10 +34,10 @@ describe('DeleteReplyUseCase', () => {
     await deleteReplyUseCase.execute(credentialId, threadId, commentId, replyId);
 
     // Assert
-    expect(mockThreadRepository.getThreadById).toHaveBeenCalledWith(threadId);
-    expect(mockCommentRepository.getCommentById).toHaveBeenCalledWith(commentId);
-    expect(mockReplyRepository.getReplyById).toHaveBeenCalledWith(replyId);
-    expect(mockReplyRepository.verifyOwner).toHaveBeenCalledWith(credentialId, replyId);
+    expect(mockThreadRepository.verifyThreadAvailability).toHaveBeenCalledWith(threadId);
+    expect(mockCommentRepository.verifyCommentAvailability).toHaveBeenCalledWith(commentId);
+    expect(mockReplyRepository.verifyReplyAvailability).toHaveBeenCalledWith(replyId);
+    expect(mockReplyRepository.verifyReplyOwner).toHaveBeenCalledWith(credentialId, replyId);
     expect(mockReplyRepository.deleteReply).toHaveBeenCalledWith(replyId);
   });
 });

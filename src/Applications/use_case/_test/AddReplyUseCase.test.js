@@ -11,13 +11,11 @@ describe('AddReplyUseCase', () => {
     const credentialId = 'user-123';
     const threadId = 'thread-123';
     const commentId = 'comment-123';
-    const payload = {
-      content: 'This is a reply',
-    };
+    const content = 'This is a reply';
 
-    const mockReply = new AddedReply({
+    const mockAddedReply = new AddedReply({
       id: 'reply-123',
-      content: payload.content,
+      content,
       owner: credentialId,
     });
 
@@ -27,15 +25,9 @@ describe('AddReplyUseCase', () => {
     const mockReplyRepository = new ReplyRepository();
 
     /* mocking needed function */
-    mockThreadRepository.getThreadById = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(threadId));
-    mockCommentRepository.getCommentById = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(commentId));
-    mockReplyRepository.addReply = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(mockReply));
+    mockThreadRepository.verifyThreadAvailability = jest.fn(() => Promise.resolve());
+    mockCommentRepository.verifyCommentAvailability = jest.fn(() => Promise.resolve());
+    mockReplyRepository.addReply = jest.fn(() => Promise.resolve(mockAddedReply));
 
     /* create use case instance */
     const addReplyUseCase = new AddReplyUseCase({
@@ -49,16 +41,21 @@ describe('AddReplyUseCase', () => {
       credentialId,
       threadId,
       commentId,
-      payload,
+      content,
     );
 
     // Assert
-    expect(addedReply).toStrictEqual(mockReply);
+    expect(mockThreadRepository.verifyThreadAvailability).toBeCalledWith(threadId);
+    expect(mockCommentRepository.verifyCommentAvailability).toBeCalledWith(commentId);
     expect(mockReplyRepository.addReply).toBeCalledWith(
-      credentialId,
-      threadId,
-      commentId,
-      new AddReply({ content: payload.content }),
+      new AddReply(credentialId, threadId, commentId, content),
     );
+    expect(addedReply).toStrictEqual(new AddedReply(
+      {
+        id: 'reply-123',
+        content,
+        owner: credentialId,
+      },
+    ));
   });
 });

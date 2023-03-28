@@ -1,4 +1,5 @@
 const AddedComment = require('../../Domains/comments/entities/AddedComment');
+const GetComments = require('../../Domains/comments/entities/GetComments');
 const CommentRepository = require('../../Domains/comments/CommentRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
@@ -10,21 +11,20 @@ class CommentRepositoryPostgres extends CommentRepository {
     this._idGenerator = idGenerator;
   }
 
-  async addComment(credentialId, threadId, comment) {
-    const { content } = comment;
+  async addComment({ userId, threadId, content }) {
     const id = `comment-${this._idGenerator()}`;
     const date = new Date().toISOString();
 
     const query = {
       text: 'INSERT INTO comments VALUES($1, $2, $3, $4, $5, $6) RETURNING id, content, owner',
-      values: [id, content, date, credentialId, threadId, false],
+      values: [id, content, date, userId, threadId, false],
     };
     const result = await this._pool.query(query);
 
-    return new AddedComment({ ...result.rows[0] });
+    return new AddedComment(result.rows[0]);
   }
 
-  async getCommentById(commentId) {
+  async verifyCommentAvailability(commentId) {
     const query = {
       text: 'SELECT * FROM comments WHERE id = $1',
       values: [commentId],
@@ -34,11 +34,9 @@ class CommentRepositoryPostgres extends CommentRepository {
     if (!result.rows.length) {
       throw new NotFoundError('Comment not found.');
     }
-
-    return result.rows[0];
   }
 
-  async verifyOwner(userId, commentId) {
+  async verifyCommentOwner(userId, commentId) {
     const query = {
       text: 'SELECT * FROM comments WHERE id = $1 AND owner = $2',
       values: [commentId, userId],
@@ -69,7 +67,7 @@ class CommentRepositoryPostgres extends CommentRepository {
     };
     const result = await this._pool.query(query);
 
-    return result.rows;
+    return new GetComments(result.rows);
   }
 }
 

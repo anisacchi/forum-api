@@ -1,18 +1,19 @@
 class AddReply {
-  constructor(payload) {
-    this._verifyPayload(payload);
+  constructor(userId, threadId, commentId, content) {
+    this._verifyPayload(userId, threadId, commentId, content);
 
-    const { content } = payload;
-
+    this.userId = userId;
+    this.threadId = threadId;
+    this.commentId = commentId;
     this.content = content;
   }
 
-  _verifyPayload({ content }) {
-    if (!content) {
+  _verifyPayload(userId, threadId, commentId, content) {
+    if (!userId || !threadId || !commentId || !content) {
       throw new Error('ADD_REPLY.NOT_CONTAIN_NEEDED_PROPERTY');
     }
 
-    if (typeof content !== 'string') {
+    if (typeof userId !== 'string' || typeof threadId !== 'string' || typeof commentId !== 'string' || typeof content !== 'string') {
       throw new Error('ADD_REPLY.NOT_MEET_TYPE_DATA_SPESIFICATION');
     }
   }

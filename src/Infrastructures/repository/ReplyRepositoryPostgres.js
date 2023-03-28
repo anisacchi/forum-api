@@ -1,4 +1,5 @@
 const AddedReply = require('../../Domains/replies/entities/AddedReply');
+const GetReplies = require('../../Domains/replies/entities/GetReplies');
 const ReplyRepository = require('../../Domains/replies/ReplyRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
@@ -10,21 +11,22 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     this._idGenerator = idGenerator;
   }
 
-  async addReply(credentialId, threadId, commentId, reply) {
-    const { content } = reply;
+  async addReply({
+    userId, threadId, commentId, content,
+  }) {
     const id = `reply-${this._idGenerator()}`;
     const date = new Date().toISOString();
 
     const query = {
       text: 'INSERT INTO replies VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id, content, owner',
-      values: [id, content, date, credentialId, threadId, commentId, false],
+      values: [id, content, date, userId, threadId, commentId, false],
     };
     const result = await this._pool.query(query);
 
-    return new AddedReply({ ...result.rows[0] });
+    return new AddedReply(result.rows[0]);
   }
 
-  async getReplyById(replyId) {
+  async verifyReplyAvailability(replyId) {
     const query = {
       text: 'SELECT * FROM replies WHERE id = $1',
       values: [replyId],
@@ -34,11 +36,9 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     if (!result.rows.length) {
       throw new NotFoundError('Reply not found.');
     }
-
-    return result.rows[0];
   }
 
-  async verifyOwner(credentialId, replyId) {
+  async verifyReplyOwner(credentialId, replyId) {
     const query = {
       text: 'SELECT * FROM replies WHERE id = $1 AND owner = $2',
       values: [replyId, credentialId],
@@ -69,7 +69,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     };
     const result = await this._pool.query(query);
 
-    return result.rows;
+    return new GetReplies(result.rows);
   }
 }
 

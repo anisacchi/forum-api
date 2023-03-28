@@ -1,13 +1,13 @@
 class ReplyRepository {
-  async addReply(credentialId, commentId, reply) {
+  async addReply({ userId, threadId, commentId, reply }) {
     throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
-  async getReplyById(id) {
+  async verifyReplyAvailability(id) {
     throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
-  async verifyOwner(userId, replyId) {
+  async verifyReplyOwner(userId, replyId) {
     throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
