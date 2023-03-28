@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 class CommentRepository {
   async addComment({ userId, threadId, content }) {
     throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
